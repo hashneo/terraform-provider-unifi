@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -13,7 +14,8 @@ import (
 	"github.com/steventaylor/terraform-provider-unifi/internal/client"
 )
 
-var _ resource.Resource = &WiFiBroadcastResource{}
+var _ resource.Resource                = &WiFiBroadcastResource{}
+var _ resource.ResourceWithImportState = &WiFiBroadcastResource{}
 
 type WiFiBroadcastResource struct{ client *client.Client }
 
@@ -113,4 +115,8 @@ func (r *WiFiBroadcastResource) Delete(ctx context.Context, req resource.DeleteR
 	if err := r.client.DeleteWiFiBroadcast(state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete WiFi broadcast", err.Error())
 	}
+}
+
+func (r *WiFiBroadcastResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

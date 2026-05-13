@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -14,7 +15,8 @@ import (
 	"github.com/steventaylor/terraform-provider-unifi/internal/client"
 )
 
-var _ resource.Resource = &FirewallPolicyResource{}
+var _ resource.Resource                = &FirewallPolicyResource{}
+var _ resource.ResourceWithImportState = &FirewallPolicyResource{}
 
 type FirewallPolicyResource struct{ client *client.Client }
 
@@ -127,4 +129,8 @@ func (r *FirewallPolicyResource) Delete(ctx context.Context, req resource.Delete
 	if err := r.client.DeleteFirewallPolicy(state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete firewall policy", err.Error())
 	}
+}
+
+func (r *FirewallPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

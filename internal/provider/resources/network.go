@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -13,7 +14,8 @@ import (
 	"github.com/steventaylor/terraform-provider-unifi/internal/client"
 )
 
-var _ resource.Resource = &NetworkResource{}
+var _ resource.Resource                = &NetworkResource{}
+var _ resource.ResourceWithImportState = &NetworkResource{}
 
 type NetworkResource struct{ client *client.Client }
 
@@ -120,4 +122,8 @@ func (r *NetworkResource) Delete(ctx context.Context, req resource.DeleteRequest
 	if err := r.client.DeleteNetwork(state.ID.ValueString()); err != nil {
 		resp.Diagnostics.AddError("Failed to delete network", err.Error())
 	}
+}
+
+func (r *NetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
